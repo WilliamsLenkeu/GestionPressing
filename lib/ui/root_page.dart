@@ -68,7 +68,7 @@ class _RootPageState extends State<RootPage> {
           Navigator.push(
             context,
             PageTransition(
-                child: const HomePage(),
+                child: const CartPage(),
                 type: PageTransitionType.bottomToTop
             ),
           );
