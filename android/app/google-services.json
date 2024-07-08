@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "212181372291",
+    "project_id": "gestionpressing-2596c",
+    "storage_bucket": "gestionpressing-2596c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212181372291:android:9677a63671b071f8277ab6",
+        "android_client_info": {
+          "package_name": "com.learn.gestwash"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoUawhfwm26XkVzZJ0oSx1YfPjxbuRSc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
