@@ -39,6 +39,8 @@ dependencies:
   page_transition: ^2.0.5
   awesome_notifications: ^0.9.3+1
   shared_preferences: ^2.2.3
+  cloud_firestore: ^4.17.5
+  firebase_core: ^2.32.0
 
 dev_dependencies:
   flutter_test:

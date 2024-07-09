@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:212181372291:android:9677a63671b071f8277ab6",
+        "mobilesdk_app_id": "1:212181372291:android:1a0f35877edee8f4277ab6",
         "android_client_info": {
-          "package_name": "com.learn.gestwash"
+          "package_name": "com.example.gestwash"
         }
       },
       "oauth_client": [],
