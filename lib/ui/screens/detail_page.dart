@@ -21,57 +21,6 @@ class DetailPage extends StatelessWidget {
     return null;
   }
 
-  void _showChangeStatusDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        String? selectedStatus;
-        return AlertDialog(
-          title: const Text('Changer le statut de la commande'),
-          content: DropdownButton<String>(
-            isExpanded: true,
-            value: selectedStatus,
-            hint: const Text('Sélectionner un statut'),
-            items: <String>[
-              'En attente de ramassage',
-              'En cours de traitement',
-              'Prêt à être livré'
-            ].map((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-            onChanged: (value) {
-              selectedStatus = value;
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Annuler'),
-            ),
-            TextButton(
-              onPressed: () async {
-                if (selectedStatus != null) {
-                  await firestore.FirebaseFirestore.instance
-                      .collection('orders')
-                      .doc(order.id)
-                      .update({'status': selectedStatus});
-                  Navigator.of(context).pop();
-                  _showStatusChangedDialog(context, selectedStatus!);
-                }
-              },
-              child: const Text('Valider'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _showStatusChangedDialog(BuildContext context, String newStatus) {
     showDialog(
       context: context,
@@ -183,10 +132,14 @@ class DetailPage extends StatelessWidget {
                 if (userRole == 'Propriétaire de pressing') ...[
                   _buildActionButton(
                     context,
-                    'Changer le statut de la commande',
+                    'Commande remplie',
                     Constants.primaryColor,
-                        () {
-                      _showChangeStatusDialog(context);
+                        () async {
+                      await firestore.FirebaseFirestore.instance
+                          .collection('orders')
+                          .doc(order.id)
+                          .update({'status': 'Prêt à être livré'});
+                      _showStatusChangedDialog(context, 'Prêt à être livré');
                     },
                   ),
                 ],
