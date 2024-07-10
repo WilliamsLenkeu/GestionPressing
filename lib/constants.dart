@@ -13,4 +13,9 @@ class Constants {
   static var descriptionTwo = "Une autre expérience en matière de service";
   static var titleThree = "Une assistance sans faille";
   static var descriptionThree = "Il est mis a la disposition du client un service d’assistance performant";
+
+  //Amount value
+  static var lavageAmount = 5000;
+  static var lavageSecAmount = 7000;
+  static var repassageAmount = 8000;
 }

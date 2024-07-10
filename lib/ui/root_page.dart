@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gestwash/constants.dart';
 import 'package:gestwash/models/new_order.dart';
 import 'package:gestwash/ui/screens/cart_page.dart';
-import 'package:gestwash/ui/screens/favorite_page.dart';
+import 'package:gestwash/ui/screens/wallet_page.dart';
 import 'package:gestwash/ui/screens/home_page.dart';
 import 'package:gestwash/ui/screens/profile_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -24,21 +24,21 @@ class _RootPageState extends State<RootPage> {
   List<Widget> pages = const [
     HomePage(),
     CartPage(),
-    FavoritePage(),
+    WalletPage(),
     ProfilePage()
   ];
 
   List<IconData> iconList = const [
     Icons.home,
     Icons.add_business,
-    Icons.favorite,
+    Icons.account_balance_wallet_rounded,
     Icons.person
   ];
 
   List<String> titleList = const [
     'Home',
     'Commande',
-    'Mes Affaires',
+    'Mes Depenses',
     'Profil'
   ];
 

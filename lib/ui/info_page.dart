@@ -143,6 +143,7 @@ class _InfoPageState extends State<InfoPage> {
                       'address': _addressController.text,
                       'role': _selectedRole,
                       'email': _userEmail,
+                      'solde': 0,
                     });
 
                     Navigator.pushReplacement(

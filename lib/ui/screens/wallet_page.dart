@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class FavoritePage extends StatefulWidget {
-  const FavoritePage({super.key});
+class WalletPage extends StatefulWidget {
+  const WalletPage({super.key});
 
   @override
-  State<FavoritePage> createState() => _FavoritePageState();
+  State<WalletPage> createState() => _WalletPageState();
 }
 
-class _FavoritePageState extends State<FavoritePage> {
+class _WalletPageState extends State<WalletPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

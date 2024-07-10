@@ -99,7 +99,7 @@ class _CartPageState extends State<CartPage> {
             title: Text(order.itemDescription),
             subtitle: Text(
                 'Client: ${order.customerName}\nAdresse: ${order.customerAddress}\nStatut: ${order.status}'),
-            trailing: Text('${order.totalAmount} €'),
+            trailing: Text('${order.totalAmount} XAF'),
             onTap: () {
               Navigator.push(
                 context,
