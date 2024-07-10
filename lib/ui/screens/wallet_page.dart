@@ -1,44 +1,62 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart' as firestore;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class WalletPage extends StatefulWidget {
   const WalletPage({Key? key}) : super(key: key);
 
   @override
-  State<WalletPage> createState() => _WalletPageState();
+  _WalletPageState createState() => _WalletPageState();
 }
 
 class _WalletPageState extends State<WalletPage> {
-  late Stream<List<Map<String, dynamic>>> transactionsStream;
-  double? solde;
+  String? _userId = FirebaseAuth.instance.currentUser?.uid;
+  double _balance = 0.0;
+  List<Transaction> _transactions = [];
 
   @override
   void initState() {
     super.initState();
-    transactionsStream = Stream.empty(); // Initialisation avec une valeur par défaut
-    _fetchData();
+    if (_userId != null) {
+      fetchBalance();
+      fetchTransactions();
+    }
   }
 
-  Future<void> _fetchData() async {
-    User? currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      firestore.QuerySnapshot transactionsSnapshot = await firestore.FirebaseFirestore.instance
+  Future<void> fetchBalance() async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>> userDoc =
+      await FirebaseFirestore.instance.collection('users').doc(_userId).get();
+
+      if (userDoc.exists) {
+        setState(() {
+          _balance = userDoc.data()?['solde'] ?? 0.0;
+        });
+      } else {
+        print('User does not exist or document not found');
+      }
+    } catch (e) {
+      print('Error fetching balance: $e');
+    }
+  }
+
+  Future<void> fetchTransactions() async {
+    try {
+      QuerySnapshot<Map<String, dynamic>> transactionDocs = await FirebaseFirestore.instance
           .collection('transactions')
-          .where('debiteur', isEqualTo: currentUser.displayName ?? currentUser.email ?? 'Utilisateur inconnu')
           .get();
 
-      setState(() {
-        transactionsStream = Stream.value(transactionsSnapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList());
-      });
-
-      firestore.DocumentSnapshot userDoc = await firestore.FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .get();
-      setState(() {
-        solde = userDoc['solde'];
-      });
+      if (transactionDocs.docs.isNotEmpty) {
+        setState(() {
+          _transactions = transactionDocs.docs
+              .map((doc) => Transaction.fromFirestore(doc.data()))
+              .toList();
+        });
+      } else {
+        print('No transactions found');
+      }
+    } catch (e) {
+      print('Error fetching transactions: $e');
     }
   }
 
@@ -46,61 +64,53 @@ class _WalletPageState extends State<WalletPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Page de dépenses',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Colors.blueAccent,
-        centerTitle: true,
+        title: Text('Wallet'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (solde != null) ...[
-              Text(
-                'Solde total : $solde €',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-            ],
-            const Text(
-              'Transactions :',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Your balance: $_balance',
+              style: TextStyle(fontSize: 24),
             ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: StreamBuilder<List<Map<String, dynamic>>>(
-                stream: transactionsStream,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Erreur : ${snapshot.error}'));
-                  }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('Aucune transaction trouvée.'));
-                  }
-                  List<Map<String, dynamic>> transactions = snapshot.data!;
-                  return ListView.builder(
-                    itemCount: transactions.length,
-                    itemBuilder: (context, index) {
-                      Map<String, dynamic> transaction = transactions[index];
-                      return ListTile(
-                        title: Text('Montant : ${transaction['montant']} €'),
-                        subtitle: Text('De : ${transaction['debiteur']} | Vers : ${transaction['receveur']}'),
-                        trailing: Text(transaction['timestamp'] != null ? 'Date : ${transaction['timestamp']}' : ''),
-                      );
-                    },
-                  );
-                },
-              ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _transactions.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text('Debiteur: ${_transactions[index].debiteur}'),
+                  subtitle: Text('Montant: ${_transactions[index].montant.toString()}'),
+                  trailing: Text('Receveur: ${_transactions[index].receveur}'),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class Transaction {
+  final String debiteur;
+  final double montant;
+  final String receveur;
+
+  Transaction({
+    required this.debiteur,
+    required this.montant,
+    required this.receveur,
+  });
+
+  factory Transaction.fromFirestore(Map<String, dynamic> json) {
+    return Transaction(
+      debiteur: json['debiteur'] ?? '',
+      montant: (json['montant'] ?? 0.0).toDouble(), // Convertir en double si nécessaire
+      receveur: json['receveur'] ?? '',
     );
   }
 }
