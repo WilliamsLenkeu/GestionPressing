@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:gestwash/constants.dart';
-import 'package:gestwash/models/order.dart';
+import 'package:gestwash/models/order1.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -12,26 +13,42 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int selectedIndex = 0;
+  TextEditingController _searchController = TextEditingController();
+  final List<Order> _orderList = Order.orderList;
+  final List<String> _orderTypes = [
+    'Lavage et repassage',
+    'Nettoyage à sec',
+    'Lavage',
+    'Repassage'
+  ];
+
+  // Liste filtrée de commandes
+  List<Order> filteredOrders = [];
+
+  @override
+  void initState() {
+    super.initState();
+    filteredOrders = _orderList;
+  }
 
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    final List<Order> _orderList = Order.orderList;
-    final List<String> _orderTypes = [
-      'Lavage et repassage',
-      'Nettoyage à sec',
-      'Lavage',
-      'Repassage'
-    ];
 
-    // Créez une liste unique des commandes par type de service
-    final List<Order> uniqueOrderList = [];
-    final Set<String> seenServices = {};
-
-    for (final Order order in _orderList) {
-      if (!seenServices.contains(order.serviceType)) {
-        uniqueOrderList.add(order);
-        seenServices.add(order.serviceType);
+    // Filtrer les commandes par recherche
+    void filterOrders(String query) {
+      if (query.isNotEmpty) {
+        List<Order> tempList = [];
+        tempList.addAll(_orderList.where((order) =>
+            order.serviceType.toLowerCase().contains(query.toLowerCase())));
+        setState(() {
+          filteredOrders = tempList;
+        });
+        return;
+      } else {
+        setState(() {
+          filteredOrders = _orderList;
+        });
       }
     }
 
@@ -45,34 +62,40 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    width: size.width * .9,
-                    decoration: BoxDecoration(
-                      color: Constants.primaryColor.withOpacity(.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.search,
-                          color: Colors.black,
-                        ),
-                        Expanded(
-                          child: TextField(
-                            showCursor: false,
-                            decoration: InputDecoration(
-                              hintText: 'Chercher une commande',
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      width: size.width * .9,
+                      decoration: BoxDecoration(
+                        color: Constants.primaryColor.withOpacity(.1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search,
+                            color: Colors.black,
+                          ),
+                          Expanded(
+                            child: TextField(
+                              controller: _searchController,
+                              onChanged: (value) {
+                                filterOrders(value);
+                              },
+                              showCursor: false,
+                              decoration: InputDecoration(
+                                hintText: 'Chercher une commande',
+                                border: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -90,6 +113,9 @@ class _HomePageState extends State<HomePage> {
                       onTap: () {
                         setState(() {
                           selectedIndex = index;
+                          // Filtrer les commandes par type de service sélectionné
+                          filteredOrders = _orderList.where((order) =>
+                          order.serviceType == _orderTypes[index]).toList();
                         });
                       },
                       child: Text(
@@ -112,7 +138,7 @@ class _HomePageState extends State<HomePage> {
             SizedBox(
               height: size.height * .3,
               child: ListView.builder(
-                itemCount: uniqueOrderList.length,
+                itemCount: filteredOrders.length,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (BuildContext context, int index) {
                   return Container(
@@ -151,8 +177,8 @@ class _HomePageState extends State<HomePage> {
                             child: SizedBox(
                               height: 120,
                               width: 120,
-                              child: Image(
-                                image: uniqueOrderList[index].getServiceImage(), // Utilisation de getServiceImage()
+                              child: Image.asset(
+                                filteredOrders[index].serviceImage,
                               ),
                             ),
                           ),
@@ -164,14 +190,14 @@ class _HomePageState extends State<HomePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                uniqueOrderList[index].serviceType,
+                                filteredOrders[index].serviceType,
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 16,
                                 ),
                               ),
                               Text(
-                                uniqueOrderList[index].itemDescription,
+                                filteredOrders[index].itemDescription,
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 14,
@@ -191,7 +217,7 @@ class _HomePageState extends State<HomePage> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              '${uniqueOrderList[index].totalAmount} XAF',
+                              '${filteredOrders[index].totalAmount} XAF',
                               style: TextStyle(
                                 color: Constants.primaryColor,
                                 fontSize: 16,
@@ -253,8 +279,8 @@ class _HomePageState extends State<HomePage> {
                               child: Center(
                                 child: SizedBox(
                                   height: 80.0,
-                                  child: Image(
-                                    image: _orderList[index].getServiceImage(), // Utilisation de getServiceImage()
+                                  child: Image.asset(
+                                    _orderList[index].serviceImage,
                                   ),
                                 ),
                               ),
