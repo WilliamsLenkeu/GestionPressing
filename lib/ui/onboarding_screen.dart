@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gestwash/constants.dart';
 import 'package:gestwash/ui/root_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gestwash/ui/login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -29,7 +31,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     context, MaterialPageRoute(builder: (_) => const RootPage()));
               },
               child: const Text(
-                'Skip',
+                'Passer',
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 16.0,
@@ -50,7 +52,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               });
             },
             controller: _pageController,
-            children: [
+            children:  [
               CreatePage(
                 image: 'assets/images/home-1.png',
                 title: Constants.titleOne,
@@ -86,19 +88,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
               child: IconButton(
                 onPressed: () {
-                  setState(() {
-                    if (currentIndex < 2) {
-                      currentIndex++;
-                      if (currentIndex < 3) {
-                        _pageController.nextPage(
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeIn);
-                      }
+                  if (currentIndex < 2) {
+                    _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeIn);
+                  } else {
+                    User? user = FirebaseAuth.instance.currentUser;
+                    if (user == null) {
+                      Navigator.pushReplacement(
+                          context, MaterialPageRoute(builder: (_) => const LoginPage()));
                     } else {
                       Navigator.pushReplacement(
                           context, MaterialPageRoute(builder: (_) => const RootPage()));
                     }
-                  });
+                  }
                 },
                 icon: const Icon(
                   Icons.arrow_forward_ios,
