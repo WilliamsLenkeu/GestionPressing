@@ -1,11 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:gestwash/constants.dart';
 import 'package:gestwash/models/order.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -152,8 +151,8 @@ class _HomePageState extends State<HomePage> {
                             child: SizedBox(
                               height: 120,
                               width: 120,
-                              child: Image.asset(
-                                uniqueOrderList[index].serviceImage,
+                              child: Image(
+                                image: uniqueOrderList[index].getServiceImage(), // Utilisation de getServiceImage()
                               ),
                             ),
                           ),
@@ -254,8 +253,8 @@ class _HomePageState extends State<HomePage> {
                               child: Center(
                                 child: SizedBox(
                                   height: 80.0,
-                                  child: Image.asset(
-                                    _orderList[index].serviceImage,
+                                  child: Image(
+                                    image: _orderList[index].getServiceImage(), // Utilisation de getServiceImage()
                                   ),
                                 ),
                               ),

@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:gestwash/constants.dart';
 import 'package:gestwash/ui/info_page.dart'; // Importer InfoPage
+import 'package:gestwash/ui/root_page.dart'; // Importer RootPage
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -34,6 +36,24 @@ class _LoginPageState extends State<LoginPage> {
         _isLoggedIn = true;
         _currentUser = currentUser;
       });
+      await _navigateBasedOnUserExistence(currentUser);
+    }
+  }
+
+  Future<void> _navigateBasedOnUserExistence(User user) async {
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    if (userDoc.exists) {
+      // L'utilisateur existe déjà dans Firestore, naviguer vers RootPage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => RootPage()),
+      );
+    } else {
+      // L'utilisateur n'existe pas encore dans Firestore, naviguer vers InfoPage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => InfoPage(currentUser: user)),
+      );
     }
   }
 
@@ -51,8 +71,7 @@ class _LoginPageState extends State<LoginPage> {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -66,13 +85,7 @@ class _LoginPageState extends State<LoginPage> {
         _currentUser = FirebaseAuth.instance.currentUser; // Enregistrer l'utilisateur actuel
       });
 
-      // Naviguer vers InfoPage avec les informations de l'utilisateur
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => InfoPage(currentUser: _currentUser!),
-        ),
-      );
+      await _navigateBasedOnUserExistence(_currentUser!);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erreur de connexion: $e')),
@@ -102,13 +115,7 @@ class _LoginPageState extends State<LoginPage> {
           _currentUser = FirebaseAuth.instance.currentUser; // Enregistrer l'utilisateur actuel
         });
 
-        // Naviguer vers InfoPage avec les informations de l'utilisateur
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => InfoPage(currentUser: _currentUser!),
-          ),
-        );
+        await _navigateBasedOnUserExistence(_currentUser!);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erreur de connexion: $e')),
@@ -124,8 +131,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoggedIn) {
-      // Si l'utilisateur est connecté, affichez directement InfoPage avec les informations de l'utilisateur
-      return InfoPage(currentUser: _currentUser!);
+      // Si l'utilisateur est connecté, affichez directement un indicateur de progression pendant que la navigation est vérifiée
+      return Center(
+        child: CircularProgressIndicator(),
+      );
     }
 
     return Scaffold(
