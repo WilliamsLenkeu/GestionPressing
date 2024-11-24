@@ -4,6 +4,7 @@ import 'package:gestwash/constants.dart';
 import 'package:gestwash/ui/screens/cart_page.dart';
 import 'package:gestwash/ui/screens/favorite_page.dart';
 import 'package:gestwash/ui/screens/home_page.dart';
+import 'package:gestwash/ui/screens/pressing_search.dart';
 import 'package:gestwash/ui/screens/profile_page.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -21,7 +22,8 @@ class _RootPageState extends State<RootPage> {
     HomePage(),
     CartPage(),
     FavoritePage(),
-    ProfilePage()
+    ProfilePage(),
+
   ];
 
   List<IconData> iconList = const[
@@ -52,9 +54,12 @@ class _RootPageState extends State<RootPage> {
                   fontSize: 24
                 ),
             ),
-            Icon(Icons.notifications, color: Constants.blackColor, size: 30.0,)
+
           ],
         ),
+        actions: [
+          IconButton(onPressed: (){ Navigator.push(context,MaterialPageRoute(builder: (context) => const PressingSearch()) );}, icon:  Icon(Icons.notifications, color: Constants.blackColor, size: 30.0,))
+        ],
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0.0,
         centerTitle: true,
